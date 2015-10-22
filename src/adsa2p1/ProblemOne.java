@@ -79,13 +79,15 @@ public class ProblemOne {
 		}
 		
 		List<Course> courses = loadTimeTable(inputFile);
-						
+		
+		int roomsRequired = 0;
+		
 		if (algType.equals("greedy")) {
-			greedyAlloc(courses);
+			roomsRequired = greedyAlloc(courses);
 		} else if (algType.equals("balanced")){
-			bestGreedyAlloc(courses, new RotateGenerator<Course>());
+			roomsRequired = bestGreedyAlloc(courses, new RotateGenerator<Course>());
 		} else {
-			bestGreedyAlloc(courses, new ExhaustiveGenerator<Course>());
+			roomsRequired = bestGreedyAlloc(courses, new ExhaustiveGenerator<Course>());
 		}
 		
 		try {
@@ -95,7 +97,12 @@ public class ProblemOne {
 		}
 		
 		long endTime = System.nanoTime();		
-		System.out.printf("Time taken: %d", (endTime - startTime)/1000000);
+		System.out.printf(
+				"%d rooms required - Time taken: %dms (%s algorithm)\nOutput written to \"%s.out\"\n",
+				roomsRequired,
+				(endTime - startTime)/1000000,
+				algType,
+				filename);
 	}
 
 	private static int bestGreedyAlloc(List<Course> courses, PermuationGenerator<Course> pg) {
