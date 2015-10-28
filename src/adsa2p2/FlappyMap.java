@@ -1,16 +1,14 @@
 package adsa2p2;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Scanner;
+import java.io.*;
+import java.util.*;
 
 public class FlappyMap {
 	
 	private int initialAltitude, n, m, k;
 	private int[] tapIncrease, drop, topDead, bottomDead;
-		
+	private List<Integer> pipeLocations;
+	
 	public FlappyMap(FileReader inputFile) {
 			
 		BufferedReader input = new BufferedReader(inputFile);		
@@ -24,7 +22,7 @@ public class FlappyMap {
 			n = s.nextInt();
 			m = s.nextInt();
 			k = s.nextInt();
-			
+									
 			s.close();
 			line = input.readLine();
 			s = new Scanner(line);
@@ -56,12 +54,14 @@ public class FlappyMap {
 			bottomDead = new int[n];
 			Arrays.fill(bottomDead, 0);
 			
+			pipeLocations = new ArrayList<Integer>();
 			for (int i = 0; i < k; i++) {
 				s.close();
 				line = input.readLine();
 				s = new Scanner(line);
 				
 				int time = s.nextInt();
+				pipeLocations.add(time);
 				bottomDead[time] = s.nextInt();
 				topDead[time] = s.nextInt();
 			}
@@ -76,6 +76,29 @@ public class FlappyMap {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		}
+	}
+	
+	public FlappyMap(FlappyMap previous, int taps) throws NotSurvivableException {
+		
+		initialAltitude = previous.initialAltitude + previous.getAltitudeChange(0, taps);
+		
+		if (!previous.isSurvivablePosition(1, initialAltitude)) {
+			throw new NotSurvivableException(); 
+		}
+						
+		n = previous.n - 1;
+		m = previous.m;
+				
+		tapIncrease = Arrays.copyOfRange(previous.tapIncrease, 1, n + 2);
+		drop = Arrays.copyOfRange(previous.drop, 1, n + 2);
+		topDead = Arrays.copyOfRange(previous.topDead, 1, n + 2);
+		bottomDead = Arrays.copyOfRange(previous.bottomDead, 1, n + 2);
+		
+		if (previous.bottomDead[0] == 0 && previous.topDead[0] == previous.m) {
+			k = previous.k;
+		} else {
+			k = previous.k - 1;
 		}
 	}
 	
@@ -99,14 +122,41 @@ public class FlappyMap {
 		}
 	}
 	
+	public int getLowestSafe(int column) {
+		
+		if (column < n) {
+			return bottomDead[column] + 1;	
+		} else {
+			return 1;
+		}
+	}
+	
+	public int getHighestSafe(int column) {
+		
+		if (column < n) {
+			return topDead[column] - 1;	
+		} else {
+			return m;
+		}
+	}
+	
 	public int getAltitudeChange(int column, int taps) {
+		
+		int result;
 		
 		if (taps < 0) {
 			throw new RuntimeException("Taps cannot be negative");
 		} else if (taps == 0) {
-			return drop[column];
+			result = -drop[column];
 		} else {
-			return taps * tapIncrease[column];
+			result =  taps * tapIncrease[column];
 		}
+		
+		return result;
+	}
+	
+	public int getNextHeight(int column, int taps) {
+		int result = initialAltitude + getAltitudeChange(column, taps);
+		return result;
 	}
 }
