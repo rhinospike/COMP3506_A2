@@ -6,27 +6,8 @@ import java.util.*;
 public class ProblemTwo {
 
 	static int level = 0;
-	
-	private static abstract class Location {
 		
-	}
-	
-	private static class Pipe extends Location {
-		
-	}
-	
-	private static class Reachable extends Location {
-		int taps;
-		
-		@Override
-		public String toString() {
-			return String.format("%d", taps);
-		}
-		
-		public Reachable(int taps) {
-			this.taps = taps;
-		}
-	}
+
 	
 	public static void main(String[] args) {
 		
@@ -48,11 +29,11 @@ public class ProblemTwo {
 
 		minTaps2(map);
 		
-		try {			
-			System.out.printf("Min is %d\n", minTaps(map));
-		} catch (NotSurvivableException e) {
-			System.out.println("No result.");
-		}
+//		try {			
+//			System.out.printf("Min is %d\n", minTaps(map));
+//		} catch (NotSurvivableException e) {
+//			System.out.println("No result.");
+//		}
 		
 	}
 	
@@ -61,34 +42,34 @@ public class ProblemTwo {
 		Location[] currentMins = new Location[map.getHeight()];
 		
 		// Can get to starting position with 0 taps
-		currentMins[map.getInitialAltitude()] = new Reachable(0);
+		currentMins[map.getInitialAltitude()] = new ReachableLocation(0);
 
 		List<Location[]> steps = new ArrayList<Location[]>();
 		
-		for (int i = 0; i < map.getWidth(); i++) {
+		steps.add(currentMins);
 
-			steps.add(currentMins);
+		
+		for (int i = 0; i < map.getWidth(); i++) {
 			currentMins = nextColumn(i, currentMins, map);
+			steps.add(currentMins);
 		}
 		
 		for (int i = map.getHeight() - 1; i > 0; i--) {
 			
-			for (int j = 0; j < map.getWidth() - 1; j++) {
+			for (int j = 0; j < map.getWidth(); j++) {
 				Location val = steps.get(j)[i];
 
-				if (val instanceof Reachable) {
-					System.out.printf(" %s\t", val);
-				} else if (val instanceof Pipe) {
-					System.out.printf("| |\t");
+				if (val instanceof Location) {
+					System.out.printf("%s\t", val);
 				} else {
 					System.out.printf(" -\t");
 				}
 			}
 			
-			if (steps.get(map.getWidth() - 1)[i] instanceof Reachable) {
-				System.out.printf("(%s)\n", steps.get(map.getWidth() - 1)[i]);
+			if (steps.get(map.getWidth() - 1)[i] instanceof ReachableLocation) {
+				System.out.printf("(%s )\n", steps.get(map.getWidth() - 1)[i]);
 			} else {
-				System.out.printf("(-)\n");
+				System.out.printf("( - )\n");
 			}
 		}
 		
@@ -101,28 +82,28 @@ public class ProblemTwo {
 		Location[] result = new Location[map.getHeight()];
 				
 		for (int i = 0; i < map.getLowestSafe(currentColumn + 1); i++) {
-			result[i] = new Pipe();
+			result[i] = new PipeLocation();
 		}
 		
 		for (int i = map.getHighestSafe(currentColumn + 1) + 1; i < map.getHeight(); i++) {
-			result[i] = new Pipe();
+			result[i] = new PipeLocation();
 		}
 
 		
 		for (int height = 1; height < map.getHeight(); height++) {
 			
-			if (current[height] instanceof Reachable) {
+			if (current[height] instanceof ReachableLocation) {
 				int taps = 0;
-				int currentTaps = ((Reachable)current[height]).taps;
+				int currentTaps = ((ReachableLocation)current[height]).taps;
 				int newHeight;
 								
 				while ((newHeight = height + map.getAltitudeChange(currentColumn, taps)) < map.getHeight()) {
-					
-					if (newHeight > 0
-							&& (!(result[newHeight] instanceof Reachable) 
-									|| ((Reachable)result[newHeight]).taps > taps + currentTaps)) {
+										
+					if (newHeight > 0 && (result[newHeight] == null 
+						|| ((result[newHeight] instanceof ReachableLocation) 
+							&& ((ReachableLocation)result[newHeight]).taps > taps + currentTaps))) {
 						
-						result[newHeight] = new Reachable(taps + currentTaps);
+						result[newHeight] = new ReachableLocation(taps + currentTaps);
 					}
 					taps++;
 				}				
