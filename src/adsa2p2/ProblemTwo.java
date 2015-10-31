@@ -40,7 +40,8 @@ public class ProblemTwo {
 	public static int minTaps2(FlappyMap map) {
 		
 		Location[] currentMins = new Location[map.getHeight()];
-		
+		long startTime = System.nanoTime();		
+
 		// Can get to starting position with 0 taps
 		currentMins[map.getInitialAltitude()] = new ReachableLocation(0);
 
@@ -53,6 +54,10 @@ public class ProblemTwo {
 			currentMins = nextColumn(i, currentMins, map);
 			steps.add(currentMins);
 		}
+		
+		long endTime = System.nanoTime();
+		
+		System.out.printf("%d ms\n", (endTime - startTime)/1000000);
 		
 		for (int i = map.getHeight() - 1; i > 0; i--) {
 			
