@@ -27,17 +27,11 @@ public class ProblemTwo {
 		
 		FlappyMap map = new FlappyMap(inputFile);
 
-		minTaps2(map);
-		
-//		try {			
-//			System.out.printf("Min is %d\n", minTaps(map));
-//		} catch (NotSurvivableException e) {
-//			System.out.println("No result.");
-//		}
+		minTaps(map);
 		
 	}
 	
-	public static int minTaps2(FlappyMap map) {
+	public static int minTaps(FlappyMap map) {
 		
 		Location[] currentMins = new Location[map.getHeight()];
 		long startTime = System.nanoTime();		
@@ -59,25 +53,8 @@ public class ProblemTwo {
 		
 		System.out.printf("%d ms\n", (endTime - startTime)/1000000);
 		
-		for (int i = map.getHeight() - 1; i > 0; i--) {
-			
-			for (int j = 0; j < map.getWidth(); j++) {
-				Location val = steps.get(j)[i];
+		//printColumns(steps);
 
-				if (val instanceof Location) {
-					System.out.printf("%s\t", val);
-				} else {
-					System.out.printf(" -\t");
-				}
-			}
-			
-			if (steps.get(map.getWidth() - 1)[i] instanceof ReachableLocation) {
-				System.out.printf("(%s )\n", steps.get(map.getWidth() - 1)[i]);
-			} else {
-				System.out.printf("( - )\n");
-			}
-		}
-		
 		return 0;
 		
 	}
@@ -118,55 +95,25 @@ public class ProblemTwo {
 		return result;
 	}
 	
-	public static int minTaps(FlappyMap map) throws NotSurvivableException {
-		
-		if (map.getWidth() == 1) {
-					
-			int taps = 0;
-			while (map.getNextHeight(0, taps) < 0) {
-				taps++;
-			}
+	public static void printColumns(List<Location[]> steps) {
+		for (int i = steps.get(0).length - 1; i > 0; i--) {
 			
-			if (map.getNextHeight(0, taps) < map.getHeight()) {
-				level--;
-				return taps;
-			} else {
-				throw new NotSurvivableException();
-			}
-		} else {
-						
-			int taps = 0;
-			int minFound = Integer.MAX_VALUE;
-			
-			while(map.getNextHeight(0, taps) < map.getHeight()) {
-				
-				String line = "";
-				
-				for (int i = 0; i < level; i++) {
-					line += " ";
-				}
-				
-				System.out.printf("%s%d\n", line, taps);
-				level++;
-				
-				try {
-					int attempt = minTaps(new FlappyMap(map, taps));
-					if (attempt + taps < minFound) {
-						minFound = attempt + taps; 
-					}
-				} catch (NotSurvivableException e) {
-					level--;
-				}
-				
-				taps++;
-			}
-			level--;
+			for (int j = 0; j < steps.size(); j++) {
+				Location val = steps.get(j)[i];
 
-			if (minFound == Integer.MAX_VALUE) {
-				throw new NotSurvivableException();
+				if (val instanceof Location) {
+					System.out.printf("%s\t", val);
+				} else {
+					System.out.printf(" -\t");
+				}
 			}
 			
-			return minFound;						
+			if (steps.get(steps.size() - 1)[i] instanceof ReachableLocation) {
+				System.out.printf("(%s )\n", steps.get(steps.size() - 1)[i]);
+			} else {
+				System.out.printf("( - )\n");
+			}
 		}
 	}
+	
 }

@@ -98,7 +98,7 @@ public class ProblemOne {
 		
 		long endTime = System.nanoTime();		
 		System.out.printf(
-				"%d rooms required - Time taken: %dms (%s algorithm)\nOutput written to \"%s.out\"\n",
+				"%d rooms required\nTime taken: %dms (%s algorithm)\nOutput written to \"%s.out\"\n",
 				roomsRequired,
 				(endTime - startTime)/1000000,
 				algType,
@@ -116,6 +116,12 @@ public class ProblemOne {
 				reduced.add(c);
 			}
 		}
+		
+		// If there are no clashes, we only need 1 room
+		if (reduced.size() == 0) {
+			return 1;
+		}
+			
 		
 		List<List<Course>> permutations = pg.generate(reduced);
 		

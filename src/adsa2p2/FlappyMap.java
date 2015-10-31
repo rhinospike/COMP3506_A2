@@ -49,9 +49,9 @@ public class FlappyMap {
 				drop[i] = s.nextInt();
 			}	
 						
-			topDead = new int[n];
+			topDead = new int[n + 1];
 			Arrays.fill(topDead, m);
-			bottomDead = new int[n];
+			bottomDead = new int[n + 1];
 			Arrays.fill(bottomDead, 0);
 			
 			pipeLocations = new ArrayList<Integer>();
@@ -76,29 +76,6 @@ public class FlappyMap {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-		}
-	}
-	
-	public FlappyMap(FlappyMap previous, int taps) throws NotSurvivableException {
-		
-		initialAltitude = previous.initialAltitude + previous.getAltitudeChange(0, taps);
-		
-		if (!previous.isSurvivablePosition(1, initialAltitude)) {
-			throw new NotSurvivableException(); 
-		}
-						
-		n = previous.n - 1;
-		m = previous.m;
-				
-		tapIncrease = Arrays.copyOfRange(previous.tapIncrease, 1, n + 2);
-		drop = Arrays.copyOfRange(previous.drop, 1, n + 2);
-		topDead = Arrays.copyOfRange(previous.topDead, 1, n + 2);
-		bottomDead = Arrays.copyOfRange(previous.bottomDead, 1, n + 2);
-		
-		if (previous.bottomDead[0] == 0 && previous.topDead[0] == previous.m) {
-			k = previous.k;
-		} else {
-			k = previous.k - 1;
 		}
 	}
 	
