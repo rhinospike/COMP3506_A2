@@ -5,10 +5,28 @@ import java.util.*;
 
 public class ProblemOne {
 	
+	/**
+	 * The Interface PermuationGenerator. Provides a method for generating permutations of a list.
+	 *
+	 * @param <E> the type of element in the list
+	 */
 	private interface PermuationGenerator<E> {
+		
+		/**
+		 * Generate permutations of the supplied list
+		 *
+		 * @param list the list to permute
+		 * @return a list of permutations
+		 */
 		public List<List<E>> generate(List<E> list);
 	}
 	
+	/**
+	 * The Class RotateGenerator. Generates permutations by repeatedly 
+	 * moving the first element in the list to the end.
+	 *
+	 * @param <E> the type of element in the list
+	 */
 	private static class RotateGenerator<E> implements PermuationGenerator<E>  {
 
 		@Override
@@ -26,6 +44,11 @@ public class ProblemOne {
 		}
 	}
 	
+	/**
+	 * The Class ExhaustiveGenerator. Generates every possible permutation of the given list.
+	 *
+	 * @param <E> the type of element in the list
+	 */
 	private static class ExhaustiveGenerator<E> implements PermuationGenerator<E> {
 		
 		@Override
@@ -50,6 +73,11 @@ public class ProblemOne {
 		}
 	}
 	
+	/**
+	 * The main method.
+	 *
+	 * @param args the arguments
+	 */
 	public static void main(String[] args) {	
 		
 		long startTime = System.nanoTime();
@@ -91,7 +119,7 @@ public class ProblemOne {
 		}
 		
 		try {
-			writeTimeTable(filename, courses);
+			writeTimeTable(filename, courses, roomsRequired);
 		} catch (IOException e) {
 			System.err.println(e.getMessage());
 		}
@@ -168,6 +196,12 @@ public class ProblemOne {
 		}
 	}
 
+	/**
+	 * Allocate courses using a greedy algorithm
+	 *
+	 * @param courses the courses to allocate
+	 * @return the number of rooms used in the allocation 
+	 */
 	private static int greedyAlloc(List<Course> courses) {
 		
 		int roomsUsed = 0;
@@ -185,7 +219,14 @@ public class ProblemOne {
 		return roomsUsed;
 	}
 	
-	private static void writeTimeTable(String filename, List<Course> courses) throws IOException {
+	/**
+	 * Write a list of allocated courses to a file
+	 * 
+	 * @param filename the filename to write to
+	 * @param courses the courses to write
+	 * @throws IOException
+	 */
+	private static void writeTimeTable(String filename, List<Course> courses, int roomsRequired) throws IOException {
 		
 		if (filename == null || filename.length() == 0) {
 			throw new IOException("0 length filename");
@@ -195,7 +236,7 @@ public class ProblemOne {
 		
 		String ls = System.getProperty("line.separator");
 		
-		output.write(String.format("%d%s", courses.size(), ls));
+		output.write(String.format("%d%s", roomsRequired, ls));
 		
 		for (Course c : courses) {
 			output.write(String.format("%s%s", c.toString(), ls));
@@ -205,6 +246,12 @@ public class ProblemOne {
 			
 	}
 
+	/**
+	 * Load a time table.
+	 *
+	 * @param inputFile the input file
+	 * @return a list of courses read from the file
+	 */
 	private static List<Course> loadTimeTable(FileReader inputFile) {
 		
 		BufferedReader input = new BufferedReader(inputFile);
