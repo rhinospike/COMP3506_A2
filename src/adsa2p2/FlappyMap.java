@@ -6,7 +6,7 @@ import java.util.*;
 public class FlappyMap {
 	
 	private int initialAltitude, n, m, k;
-	private int[] tapIncrease, drop, topDead, bottomDead;
+	private int[] tapIncrease, drop, ceiling, floor;
 	private List<Integer> pipeLocations;
 	
 	public FlappyMap(FileReader inputFile) {
@@ -49,10 +49,10 @@ public class FlappyMap {
 				drop[i] = s.nextInt();
 			}	
 						
-			topDead = new int[n + 1];
-			Arrays.fill(topDead, m);
-			bottomDead = new int[n + 1];
-			Arrays.fill(bottomDead, 0);
+			ceiling = new int[n + 1];
+			Arrays.fill(ceiling, m);
+			floor = new int[n + 1];
+			Arrays.fill(floor, 0);
 			
 			pipeLocations = new ArrayList<Integer>();
 			for (int i = 0; i < k; i++) {
@@ -62,8 +62,8 @@ public class FlappyMap {
 				
 				int time = s.nextInt();
 				pipeLocations.add(time);
-				bottomDead[time] = Math.max(s.nextInt(), bottomDead[time]);
-				topDead[time] = Math.min(s.nextInt(), topDead[time]);
+				floor[time] = Math.max(s.nextInt(), floor[time]);
+				ceiling[time] = Math.min(s.nextInt(), ceiling[time]);
 			}
 			
 			s.close();
@@ -90,21 +90,13 @@ public class FlappyMap {
 	public int getHeight() {
 		return m;
 	}
-	
-	public boolean isSurvivablePosition(int column, int height) {
-		if (bottomDead[column] < height && height < topDead[column]) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-	
+		
 	public int getFloor(int column) {
-		return bottomDead[column];	
+		return floor[column];	
 	}
 	
 	public int getCeiling(int column) {
-		return topDead[column];
+		return ceiling[column];
 	}
 	
 	public int getAltitudeChange(int column, int taps) {
@@ -112,7 +104,7 @@ public class FlappyMap {
 		int result;
 		
 		if (taps < 0) {
-			throw new RuntimeException("Taps cannot be negative");
+			throw new RuntimeException("Don't be silly, you can't have negative taps");
 		} else if (taps == 0) {
 			result = -drop[column];
 		} else {
