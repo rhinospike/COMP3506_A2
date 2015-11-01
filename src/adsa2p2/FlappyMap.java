@@ -62,8 +62,8 @@ public class FlappyMap {
 				
 				int time = s.nextInt();
 				pipeLocations.add(time);
-				bottomDead[time] = s.nextInt();
-				topDead[time] = s.nextInt();
+				bottomDead[time] = Math.max(s.nextInt(), bottomDead[time]);
+				topDead[time] = Math.min(s.nextInt(), topDead[time]);
 			}
 			
 			s.close();
@@ -99,22 +99,12 @@ public class FlappyMap {
 		}
 	}
 	
-	public int getLowestSafe(int column) {
-		
-		if (column < n) {
-			return bottomDead[column] + 1;	
-		} else {
-			return 1;
-		}
+	public int getFloor(int column) {
+		return bottomDead[column];	
 	}
 	
-	public int getHighestSafe(int column) {
-		
-		if (column < n) {
-			return topDead[column] - 1;	
-		} else {
-			return m;
-		}
+	public int getCeiling(int column) {
+		return topDead[column];
 	}
 	
 	public int getAltitudeChange(int column, int taps) {
@@ -132,8 +122,15 @@ public class FlappyMap {
 		return result;
 	}
 	
-	public int getNextHeight(int column, int taps) {
-		int result = initialAltitude + getAltitudeChange(column, taps);
+	public int pipesPassed(int lastReached) {
+		int result = 0;
+		
+		for (int i : pipeLocations) {
+			if (lastReached > i) {
+				result++;
+			}
+		}
+		
 		return result;
 	}
 }

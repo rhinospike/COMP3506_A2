@@ -4,10 +4,6 @@ import java.io.*;
 import java.util.*;
 
 public class ProblemTwo {
-
-	static int level = 0;
-		
-
 	
 	public static void main(String[] args) {
 		
@@ -27,22 +23,24 @@ public class ProblemTwo {
 		
 		FlappyMap map = new FlappyMap(inputFile);
 
-		minTaps(map);
+		solveMap(map, args[0]);
 		
 	}
 	
-	public static int minTaps(FlappyMap map) {
-		
+	private static void solveMap(FlappyMap map, String filename) {
+			
 		Location[] currentMins = new Location[map.getHeight()];
 		long startTime = System.nanoTime();		
 
-		// Can get to starting position with 0 taps
-		currentMins[map.getInitialAltitude()] = new ReachableLocation(0);
+		if (map.getFloor(0) < map.getInitialAltitude() && map.getInitialAltitude() < map.getCeiling(0)) { 
+			// Can get to starting position with 0 taps
+			currentMins[map.getInitialAltitude()] = new ReachableLocation(0);
+		}
 
+		// Keep a list of the lowest number of taps required to reach each position in each column.
 		List<Location[]> steps = new ArrayList<Location[]>();
 		
 		steps.add(currentMins);
-
 		
 		for (int i = 0; i < map.getWidth(); i++) {
 			currentMins = nextColumn(i, currentMins, map);
@@ -53,40 +51,91 @@ public class ProblemTwo {
 		
 		System.out.printf("%d ms\n", (endTime - startTime)/1000000);
 		
+		// Uncomment the following line for a pretty picture
 		//printColumns(steps);
-
-		return 0;
 		
+		int minTaps = lowestInColumn(currentMins);
+		
+		if (minTaps >= 0) {
+			writeOutput(filename, 1, minTaps);
+		} else {
+			int lastReached = getLastReachedColumn(steps);
+			writeOutput(filename, 0, map.pipesPassed(lastReached));
+		}
 	}
 	
-	public static Location[] nextColumn(int currentColumn, Location[] current, FlappyMap map) {
+	private static int getLastReachedColumn(List<Location[]> steps) {
+		for (int i = steps.size() - 1; i >= 0; i--) {
+			for (Location l : steps.get(i)) {
+				if (l instanceof ReachableLocation) {
+					return i;
+				}
+			}
+		}
+		return 0;
+	}
 
-		Location[] result = new Location[map.getHeight()];
+	private static int lowestInColumn(Location[] column) {
+		int minTaps = -1;
+
+		for (Location l : column) {
+			if (l instanceof ReachableLocation) {
+								
+				int lTaps = ((ReachableLocation)l).taps;
 				
-		for (int i = 0; i < map.getLowestSafe(currentColumn + 1); i++) {
-			result[i] = new PipeLocation();
+				if (lTaps < minTaps || minTaps == -1){
+					minTaps = lTaps;
+				}
+			}
 		}
 		
-		for (int i = map.getHighestSafe(currentColumn + 1) + 1; i < map.getHeight(); i++) {
-			result[i] = new PipeLocation();
-		}
+		return minTaps;
+	}
+	
+	/**
+	 * 
+	 * 
+	 * @param currentColumn The 
+	 * @param current
+	 * @param map
+	 * @return
+	 */
+	private static Location[] nextColumn(int currentColumn, Location[] current, FlappyMap map) {
 
+		// Initialise the next column
+		Location[] result = new Location[map.getHeight()];
 		
+		// Fill in any pipe locations
+		// Bottom section of pipe
+		for (int i = 0; i <= map.getFloor(currentColumn + 1); i++) {
+			result[i] = new PipeLocation();
+		}
+		// Top section of pipe
+		for (int i = map.getCeiling(currentColumn + 1); i < map.getHeight(); i++) {
+			result[i] = new PipeLocation();
+		}
+			
+		// Loop through locations in current column
 		for (int height = 1; height < map.getHeight(); height++) {
 			
+			// If the location is reachable, see where we can go from here
 			if (current[height] instanceof ReachableLocation) {
 				int taps = 0;
 				int currentTaps = ((ReachableLocation)current[height]).taps;
 				int newHeight;
-								
-				while ((newHeight = height + map.getAltitudeChange(currentColumn, taps)) < map.getHeight()) {
-										
-					if (newHeight > 0 && (result[newHeight] == null 
-						|| ((result[newHeight] instanceof ReachableLocation) 
-							&& ((ReachableLocation)result[newHeight]).taps > taps + currentTaps))) {
+				
+				// Start with no taps, increase until reaching the ceiling
+				while ((newHeight = height + map.getAltitudeChange(currentColumn, taps)) < map.getCeiling(currentColumn + 1)) {
+					
+					// If the new height is more than 0 and requires less taps than previously found, update it
+					if (newHeight > 0 && 
+					   (result[newHeight] == null || 
+					       ((result[newHeight] instanceof ReachableLocation) &&
+					       ((ReachableLocation)result[newHeight]).taps > taps + currentTaps))) {
 						
 						result[newHeight] = new ReachableLocation(taps + currentTaps);
 					}
+					// Tap one more time
 					taps++;
 				}				
 			}
@@ -95,7 +144,36 @@ public class ProblemTwo {
 		return result;
 	}
 	
-	public static void printColumns(List<Location[]> steps) {
+	/**
+	 * Writes the two integers specified to a file
+	 * 
+	 * @param filename The filename to write to
+	 * @param line1 the integer to put on the first line
+	 * @param line2 the integer to put on the second line
+	 */
+	private static void writeOutput(String filename, int line1, int line2) {
+		
+		try {
+			FileWriter output = new FileWriter(filename + ".out");
+			String ls = System.getProperty("line.separator");
+
+			System.out.printf("%d%s%d%s", line1, ls, line2, ls);
+			output.write(String.format("%d%s%d%s", line1, ls, line2, ls));
+			
+			output.close();
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Print out a list of columns in a nicely formatted manner
+	 * 
+	 * @param steps a list of columns from a solution
+	 */
+	@SuppressWarnings("unused")
+	private static void printColumns(List<Location[]> steps) {
 		for (int i = steps.get(0).length - 1; i > 0; i--) {
 			
 			for (int j = 0; j < steps.size(); j++) {
