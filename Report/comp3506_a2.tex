@@ -1,0 +1,71 @@
+\documentclass[]{article}
+\usepackage[margin=1.8cm]{geometry}
+
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage[usenames,dvipsnames]{xcolor}
+\usepackage{listings}
+
+%opening
+%opening
+\title{COMP3506 Assignment 2 Report}
+\author{Ryan Fitzsimon}
+
+\begin{document}
+
+\maketitle
+
+\section{Room Allocation}
+\subsection{Greedy Algorithm}
+My greedy algorithm works by iterating over each of the $n$ courses in the supplied order. For each course, it allocates a room by starting at 1 and incrementing until a valid room is found (this will be at most $n$). For each possible room it iterates over courses that clash with the current course (at most $n - 1$) to check if any are scheduled in the same room. Once a room without clashes is found, it is saved. This means the total time complexity is $O(n\times[n-1]\times n)=O(n^3)$.
+
+Adjacency lists are used to store the graph structure. Building the graph structure has a time complexity of $\theta(n^2)$, as it iterates over each course, and over each of the previous courses within that iteration. When considering both generating and colouring the graph, the $n^3$ term is dominant, giving an overall time complexity of $O(n^3)$.
+
+\subsection{Optimal Algorithm}
+My optimal algorithm works by running the greedy algorithm on every possible permutation of the input courses and taking the best result. Since there are $n!$ permutations of any $n$ distinct objects, the greedy algorithm is run $n!$ times. The permutations are generated recursively using a method with a constant time base case complexity that terminates $n!$ times, and thus has an overall time complexity of $\theta(n!)$. The overall time complexity of the algorithm is therefore $O(n^3n! + n!) = O(n^3n!)$.
+
+The algorithm is guaranteed to be optimal because there is always some input order that will result in the greedy algorithm producing the optimal graph colouring. Given a pre-coloured optimal input, the greedy algorithm can be made to produce an identical output by inputting the vertices in order of colour (choosing the next colours by ). Since this ordering must be in the set of all possible permutations of the vertices, the optimality of the solution is guaranteed.
+
+\subsection{Balanced Algorithm}
+\textbf{Algorithm \textcolor{red}{BalancedAllocate(Courses)}}\\
+\color{gray}
+
+\hspace*{1cm} \textcolor{black}{\textbf{Input}} Linked List \textbf{Courses}  
+
+\hspace*{1cm} \textcolor{black}{\textbf{Output}} {Timetable \textbf{BestFound} of allocated courses\\
+
+\hspace*{1cm} \textbf{BestFound} \textcolor{black}{$\leftarrow$} \textbf{GreedyAllocate(Courses})\\
+
+\hspace*{1cm} \textcolor{black}{\textbf{for}} \textbf{(i = 0; i \textless{} Courses.length() - 1; i++)}
+
+\hspace*{2cm} \textbf{Courses.Append(Courses.RemoveFirst())}
+
+\hspace*{2cm} \textbf{NewFound} \textcolor{black}{$\leftarrow$} \textbf{Greedy-Allocate(Courses})\\
+
+\hspace*{2cm} \textcolor{black}{\textbf{if}} \textbf{NewFound.RoomsRequired() \textless{} BestFound.RoomsRequired()}
+
+\hspace*{3cm} \textbf{BestFound} \textcolor{black}{$\leftarrow$} \textbf{NewFound}\\
+\\
+\color{black}
+My balanced algorithm works in a similar manner to the optimal algorithm, but uses only a limited set of permutations of the input courses, chosen so that the starting vertex is always different. Since the optimality of the greedy algorithm is highly dependent on the starting vertex, the probability of an optimal result is much higher than when running the greedy algorithm once, but is still not guaranteed. Since this algorithm runs the greedy algorithm n times, it has a time complexity of $O(n^4)$.
+
+\newpage
+\section{Flappy Bird}
+In the following discussion, I will refer to groups of horizontal/time coordinates as columns and specific, singular points with both a horizontal/time and vertical coordinate as positions.
+\\\\
+My algorithm works by repeatedly finding the lowest number of taps required to reach each position in the next column. 
+\\\\
+To begin with, the initial position in the starting column is marked as reachable with 0 taps in a new array (unless it is out of bounds or pipe is there).
+\\\\
+The lowest possible number of taps to reach each position in the next column is then determined by iterating over the positions in the current column. First, an array is created to store the results. Then for each of $m$ positions in the current column, reachability is checked (by checking if a number of taps is stored there). If they are reachable the possible next positions are determined. This is done by starting at 0 and incrementing the number of taps until the ceiling (or pipe) is reached (this will be at most $m - 1$ taps, more than that would always go past the ceiling). If any of the possible next positions required less taps to reach than that currently stored in the next column array, that number of taps replaces the value in the array.
+\\\\
+This process is repeated on the resultant array until the last column is reached (i.e. repeated $n$ times). The lowest number of taps required to complete the level is the smallest number in the final array.
+\\\\
+The entire algorithm has a complexity of $O(n\times m^2)$ \textendash{} $n$ columns $\times$ $m$ positions $\times$ $m$ taps. The complexity of reading the input file is difficult to determine but expected to be $O(n)$, as both the maximum number of lines and length of the lines (3 and 4 specifically) are dependent on the horizontal width of the map. Regardless, the complexity arising from the algorithm is dominant.
+\\\\
+The algorithm works because if any position in a complete path can be reached in less taps, a complete path with less taps exists. There are no cases where taking more taps to get to the same position (not just the same column) produces a path with less taps overall. In other words, the exact path taken to reach any position is irrelevant, only the number of taps required to reach it matters (as long as the path is valid, but that is assumed).
+
+\end{document}
